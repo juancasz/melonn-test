@@ -1,7 +1,10 @@
 import React from 'react';
+import { Switch,Route } from "react-router-dom"
 import Navbar from './Components/Navbar'
 import Card from './Components/Card'
 import Form from './Components/Form'
+import List from './Components/List'
+import Details from './Components/Details'
 import styled from 'styled-components'
 
 const App = () => {
@@ -10,7 +13,17 @@ const App = () => {
       <Navbar/>
       <Content> 
         <Card>
-          <Form/>
+          <Switch>
+              <Route exact path="/newOrder">
+                <Form/>
+              </Route>
+              <Route exact path="/order/:id">
+                <Details/>
+              </Route>
+              <Route path="/">
+                <List/>
+              </Route>
+          </Switch>
         </Card>
       </Content>
     </AppContainer>

@@ -5,6 +5,19 @@ const baseUrl = process.env.API_BASE_URL
 const apiKey = process.env.API_KEY
 let database = []
 
+promisesRouter.get('/:id', async(request,response,next) => {
+    try{
+        const id = request.params.id
+        const order = database.find(order => order.id === Number(id))
+        if(order){
+            return response.status(200).json(order)
+        }
+        return response.status(404).json({error: 'Orden inexistente'})
+    }catch(error){
+        next(error)
+    }
+})
+
 promisesRouter.get('/',async(request,response,next) => {
     try{
         return response.status(200).json(database)
@@ -16,8 +29,11 @@ promisesRouter.get('/',async(request,response,next) => {
 promisesRouter.post('/',async(request,response,next) => {
     const body = request.body
     let order = {
+        id: database.length+1,
+        creationDate: body.creationDate,
         store: body.store,
         idShippingMethod : body.idShippingMethod,
+        shippingMethod: body.shippingMethod,
         orderNumber: body.orderNumber,
         buyerName: body.buyerName,
         buyerPhoneNumber: body.buyerPhoneNumber,
@@ -77,7 +93,7 @@ promisesRouter.post('/',async(request,response,next) => {
 
     //GET ORDER WEIGHT
     const weight = items.reduce((sum,item) => {
-        return sum + item.pesoProducto
+        return sum + Number(item.pesoProducto)
     },0)
 
     //RULES PARAMETERS WEIGHT

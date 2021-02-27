@@ -9,8 +9,20 @@ const create = async newOrder => {
     return order
 }
 
+const getOrders = async () => {
+    const orders = await fetch(baseUrl).then(res => res.json())
+    return orders
+}
+
+const getOrderDetails = async(id) => {
+    const order = await fetch(`${baseUrl}/${id}`).then(res => res.json())
+    return order
+}
+
 const promiseService = {
-    create
+    create,
+    getOrders,
+    getOrderDetails
 }
 
 export default promiseService

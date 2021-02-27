@@ -1,11 +1,12 @@
 import React,{ useEffect,useState,forwardRef } from 'react';
-import styled from 'styled-components'
+import { Link,useHistory } from "react-router-dom"
+import AcceptButton from './AcceptButton'
+import CancelButton from './CancelButton'
 import Swal from 'sweetalert2'
 import csc from 'country-state-city'
 import MaterialTable from "material-table"
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
-import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import Paper from '@material-ui/core/Paper';
 import Autocomplete from '@material-ui/lab/Autocomplete'
@@ -30,6 +31,8 @@ import sellerService from '../Services/sellerService'
 import promiseService from '../Services/promiseService'
 
 const Form = () => {
+    const history = useHistory()
+
     const[shippingMethods,setShippingMethods] = useState([])
     const[countries,setCountries] = useState([])
     const[regions,setRegions] = useState([])
@@ -40,7 +43,7 @@ const Form = () => {
         shippingMethod: null,
         orderNumber: "",
         buyerName: "",
-        buyerPhone: "",
+        buyerPhoneNumber: "",
         buyerEmail: "",
         address:"",
         items: []
@@ -78,7 +81,7 @@ const Form = () => {
         setFormData({...formData,items:newProducts})
     }
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault()
         if(formData.items.length === 0){
             Swal.fire({
@@ -88,15 +91,21 @@ const Form = () => {
             return
         }
         const newOrder = {...formData,
+            creationDate: new Date().toUTCString(),
             idShippingMethod: formData.shippingMethod.id || 1,
+            shippingMethod: formData.shippingMethod.name,
             country: country.name,
             region: region.name,
             city: city.name
         }
 
-        delete newOrder.shippingMethod
-
-        const promise = promiseService.create(newOrder)
+        Swal.fire({
+            title: `Procesando`,
+        })
+        Swal.showLoading()
+        const promise = await promiseService.create(newOrder)
+        Swal.close()
+        
         if(promise.message){
             Swal.fire({
                 icon: 'error',
@@ -105,7 +114,13 @@ const Form = () => {
         }else{
             Swal.fire({
                 icon: 'success',
-                title: `pack_promise_min: ${promise.packPromiseMin || 'No aplica'} <br>
+                title: `Orden registrada exitosamente`
+            }).then((result) => {
+                Swal.fire({
+                    icon: 'success',
+                    title: `
+                        (Horas GMT-0)
+                        pack_promise_min: ${promise.packPromiseMin || 'No aplica'} <br>
                         pack_promise_max: ${promise.packPromiseMax || 'No aplica'} <br>
                         ship_promise_min: ${promise.shipPromiseMin || 'No aplica'} <br>
                         ship_promise_max: ${promise.shipPromiseMax || 'No aplica'} <br>
@@ -113,7 +128,8 @@ const Form = () => {
                         delivery_promise_min: ${promise.deliveryPromiseMax || 'No aplica'} <br>
                         ready_pickup_promise_min: ${promise.readyPickUpPromiseMin || 'No aplica'} <br>
                         ready_puckup_promise_max: ${promise.readyPickUpPromiseMax || 'No aplica'} <br>
-                      `,
+                  `,
+                }).then(result => history.push("/"))
             })
         }
     }
@@ -250,8 +266,8 @@ const Form = () => {
                     <Grid item md={6}>
                         <TextField 
                             required
-                            value={formData.buyerPhone}
-                            onChange={(event)=> setFormData({...formData,buyerPhone:Number(event.target.value)})}
+                            value={formData.buyerPhoneNumber}
+                            onChange={(event)=> setFormData({...formData,buyerPhoneNumber:Number(event.target.value)})}
                             type="number" 
                             id="numeroComprador" 
                             label="Número de Teléfono del Comprador" 
@@ -351,10 +367,14 @@ const Form = () => {
                     {tableProducts()}
                     <Grid item md={3}></Grid>
                     <Grid item md={3}>
-                        <AcceptButton type='submit' variant="contained" fullWidth>Guardar</AcceptButton>
+                        <AcceptButton label='Guardar'/>
                     </Grid>
                     <Grid item md={3}>
-                        <Button variant="contained" fullWidth>Cancelar</Button>
+                        <CancelButton 
+                            label='Cancelar'
+                            component={Link} 
+                            to={'/'}
+                        />
                     </Grid>
                     <Grid item md={3}></Grid>
                 </Grid>
@@ -362,12 +382,5 @@ const Form = () => {
         </React.Fragment>
     )
 }
-
-const AcceptButton = styled(Button)`
-    &&{
-       background-color: #a7ca70;
-       color: white;
-    }
-`
 
 export default Form
