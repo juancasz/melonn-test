@@ -20,5 +20,5 @@ REACT_APP_API_KEY = yourAPIKey
 After configuring the environment variables the project can be started:  
   
 To start the backend go to melonn-test/sellers-back and run npm start. The API will start to work in localhost:3001  
-  
-To start the app go to melonn-test/sellers-front and run npm start. Open in the browser the port localhost:3000 to use the application   
+   
+To start the app go to melonn-test/sellers-front and run npm install. After that run npm start and  open in the browser the port localhost:3000 to use the application   
